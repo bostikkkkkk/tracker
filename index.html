@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>90 ДНЕЙ — ТРЕКЕР</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+/* системные шрифты-замена: страница рисуется сразу, даже без интернета */
+:root{
+  --f-disp:'Oswald','Arial Narrow',system-ui,-apple-system,sans-serif;
+  --f-body:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+</style>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F3E8; --card:#FFFDF6; --ink:#221D14; --line:#E2DAC4; --mut:#8E8568;
+  --blue:#2B5FCC; --orange:#E87A12; --red:#D63A2B; --green:#1FA15B; --amber:#F0B429;
+  --misspink:#F3DBD6; --darksub:#4A4334;
+}
+html{-webkit-text-size-adjust:100%;color-scheme:light}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:0 18px 64px}
+button{font:inherit;color:inherit}
+
+.c-en{--g:var(--blue)} .c-fe{--g:var(--orange)} .c-bd{--g:var(--red)} .c-hb{--g:var(--green)}
+
+.ribbon{display:grid;grid-template-columns:repeat(4,1fr);height:7px;margin:0 -18px}
+.ribbon i:nth-child(1){background:var(--blue)}
+.ribbon i:nth-child(2){background:var(--orange)}
+.ribbon i:nth-child(3){background:var(--red)}
+.ribbon i:nth-child(4){background:var(--green)}
+
+/* ── шапка ── */
+.eyebrow{margin-top:20px;font:600 11px var(--f-mono);letter-spacing:.22em;color:var(--mut)}
+.dayrow{display:flex;align-items:baseline;gap:10px;margin-top:8px}
+.daynum{font:700 54px/1 var(--f-disp);text-transform:uppercase}
+.of{font:500 16px var(--f-mono);color:var(--mut)}
+.phase{display:inline-block;margin-top:12px;padding:6px 11px;font:600 11px var(--f-mono);letter-spacing:.12em;color:#fff;border-radius:3px}
+.phase.p1{background:var(--blue)} .phase.p2{background:var(--orange)}
+
+/* ── уровень / XP ── */
+.lvl{background:var(--ink);color:#fff;border-radius:12px;padding:16px;margin-top:16px}
+.lvlrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lvlnum{font:700 28px/1 var(--f-disp)}
+.lvlrank{padding:4px 9px;border:1.5px solid var(--amber);border-radius:4px;color:#fff;font:600 11px var(--f-mono);letter-spacing:.14em}
+.lvlxp{margin-left:auto;font:600 12px var(--f-mono);color:#4FD68F}
+.xpbar{height:9px;background:var(--darksub);border-radius:5px;margin-top:12px;overflow:hidden}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--amber));border-radius:5px}
+.xpsub{margin-top:7px;font:500 10px var(--f-mono);letter-spacing:.06em;color:rgba(255,255,255,.85)}
+
+/* ── путь 90 ── */
+.bar{position:relative;height:6px;background:var(--line);margin-top:18px;border-radius:3px}
+.bar i{display:block;height:100%;background:var(--green);border-radius:3px}
+.bar .tick{position:absolute;left:38.88%;top:-3px;width:2px;height:12px;background:var(--ink)}
+.barlbl{display:flex;justify-content:space-between;margin-top:5px;font:500 9px var(--f-mono);letter-spacing:.1em;color:var(--mut)}
+
+/* ── статистика ── */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden;margin-top:16px;background:var(--card)}
+.stat{padding:11px 6px;text-align:center;border-left:1.5px solid var(--ink)}
+.stat:first-child{border-left:0}
+.stat b{display:block;font:600 23px/1.1 var(--f-disp)}
+.stat b.ok{color:var(--green)}
+.stat span{font:500 9px var(--f-mono);letter-spacing:.14em;color:var(--mut)}
+
+/* подписанные чипы дня */
+.chips{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.chip{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border:1.5px solid var(--line);border-radius:8px;background:var(--card)}
+.chip em{font-style:normal;font-size:16px;line-height:1}
+.chip b{font:600 8px var(--f-mono);letter-spacing:.04em;color:var(--mut);text-transform:uppercase}
+.chip.on{background:color-mix(in srgb, var(--g) 16%, #fff);border-color:var(--g)}
+.chip.on b{color:var(--g)}
+
+/* ── навигация по датам ── */
+.nav{display:flex;align-items:center;justify-content:space-between;margin:24px 0 2px}
+.arr{width:44px;height:44px;border:1.5px solid var(--ink);border-radius:8px;background:var(--card);font:600 18px var(--f-disp);cursor:pointer}
+.arr:disabled{opacity:.25;cursor:default}
+.dmid{text-align:center}
+.dlab{font:600 16px var(--f-disp);text-transform:uppercase;letter-spacing:.06em}
+.tlink{margin-top:2px;background:none;border:0;font:500 10px var(--f-mono);letter-spacing:.12em;color:var(--blue);cursor:pointer;text-decoration:underline}
+
+/* ── чек-лист ── */
+.ghead{display:flex;align-items:center;gap:8px;margin:22px 0 6px;font:600 12px var(--f-disp);letter-spacing:.2em;color:var(--ink)}
+.ghead::before{content:'';width:10px;height:10px;border-radius:2px;background:var(--g,var(--ink))}
+.group{border-bottom:1px solid var(--line)}
+.item{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:10px;background:transparent;border:0;border-top:1px solid var(--line);text-align:left;border-radius:6px}
+button.item{cursor:pointer}
+.item.on{background:color-mix(in srgb, var(--g) 10%, transparent)}
+.box{flex:0 0 27px;height:27px;border:2px solid var(--ink);border-radius:7px;display:flex;align-items:center;justify-content:center;font:700 16px/1 var(--f-disp);color:#fff;transition:background .12s,border-color .12s}
+.item.on .box{background:var(--g);border-color:var(--g);animation:pop .18s ease}
+@keyframes pop{50%{transform:scale(1.25)}}
+.lbl{font:600 15px var(--f-body)}
+.norm{display:block;font:500 10px var(--f-mono);color:var(--mut);margin-top:1px}
+.xptag{margin-left:auto;font:600 10px var(--f-mono);color:var(--mut);white-space:nowrap}
+.item.on .xptag{color:var(--g)}
+
+/* счётчики усилий */
+.cnt{margin-left:auto;display:flex;align-items:center;gap:6px}
+.stp{width:36px;height:36px;border:1.5px solid var(--ink);border-radius:8px;background:var(--card);font:700 17px var(--f-disp);cursor:pointer}
+.cval{min-width:58px;text-align:center;font:600 13px var(--f-mono);padding:7px 4px;border-radius:6px;background:var(--line);color:var(--mut)}
+.item.on .cval{background:var(--g);color:#fff}
+.item:focus-visible,.arr:focus-visible,.cell:focus-visible,.stp:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.closed{margin-top:16px;padding:13px;font:600 13px var(--f-mono);letter-spacing:.08em;border-radius:8px}
+.closed.yes{background:var(--green);color:#fff}
+.closed.no{border:1.5px dashed var(--mut);color:var(--mut)}
+
+/* ── недельные шкалы ── */
+.wkcard{margin-top:28px;border:1.5px solid var(--ink);border-radius:10px;background:var(--card);padding:14px}
+.wrow{display:flex;align-items:center;gap:10px;margin-top:10px}
+.wrow:first-of-type{margin-top:4px}
+.wlbl{flex:0 0 118px;font:600 12px var(--f-body)}
+.wbar{flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.wbar i{display:block;height:100%;background:var(--g);border-radius:5px}
+.wval{flex:0 0 64px;text-align:right;font:600 10px var(--f-mono);color:var(--mut)}
+.wrow.over .wbar i{background:linear-gradient(90deg,var(--green),var(--amber))}
+.wval .overbadge{display:block;margin-top:2px;font:700 9px var(--f-mono);color:var(--green);white-space:nowrap}
+
+/* ── график XP ── */
+.xchart{display:block;width:100%;height:auto;margin-top:8px}
+.xlab{font:500 9px var(--f-mono);fill:var(--mut)}
+
+/* ── поле 90 ── */
+.gridwrap{margin-top:28px}
+.g90{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:10px}
+.cell{aspect-ratio:1;border:1.5px solid var(--line);border-radius:4px;background:var(--card);padding:0}
+.cell.clk{cursor:pointer}
+.cell.full{background:var(--green);border-color:var(--green)}
+.cell.part{background:var(--amber);border-color:var(--amber)}
+.cell.miss{background:var(--misspink);border-color:#E8C4BC}
+.cell.future{opacity:.4}
+.cell.cur{border:2.5px solid var(--ink)}
+.legend{margin-top:10px;font:500 10px var(--f-mono);letter-spacing:.04em;color:var(--mut);line-height:1.9}
+.lg{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 8px}
+.lg:first-child{margin-left:0}
+
+/* ── ачивки ── */
+.bdgs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.bdg{border:1.5px solid var(--line);border-radius:10px;background:var(--card);padding:10px 6px;text-align:center}
+.bdg em{font-style:normal;font-size:22px;line-height:1;filter:grayscale(1);opacity:.45;display:block}
+.bdg b{display:block;margin-top:5px;font:600 9px var(--f-mono);letter-spacing:.06em;color:var(--mut)}
+.bdg i{display:block;margin-top:2px;font:500 9px var(--f-mono);font-style:normal;color:var(--mut)}
+.bdg.ok{border-color:var(--green);background:color-mix(in srgb, var(--green) 8%, #fff)}
+.bdg.ok em{filter:none;opacity:1}
+.bdg.ok b{color:var(--ink)}
+.bdg.ok i{color:var(--green)}
+
+/* ── вес ── */
+.wcard{margin-top:28px;border:1.5px solid var(--ink);border-radius:10px;background:var(--card);padding:14px}
+.wnow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.wnow b{font:700 34px/1 var(--f-disp)}
+.wmeta{font:500 11px var(--f-mono);color:var(--mut)}
+.chart{display:block;width:100%;height:auto;margin-top:10px}
+.tlab{font:500 9px var(--f-mono);fill:var(--mut)}
+.glab{fill:var(--green)}
+.wform{display:flex;gap:8px;margin-top:12px}
+.wform input{flex:1;min-width:0;padding:12px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;font:600 15px var(--f-body)}
+.wform button{padding:12px 16px;border:0;border-radius:8px;background:var(--green);color:#fff;font:600 13px var(--f-disp);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.hint{font:500 12px var(--f-body);color:var(--mut);margin-top:8px}
+
+.scard{background:color-mix(in srgb,var(--red) 6%,#fff);border:1.5px solid var(--line);border-radius:10px;padding:12px 13px;margin-top:10px}
+.scard:first-of-type{margin-top:0}
+.shead{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.shead .sn{font:600 14px var(--f-body)}
+.shead .sv{margin-left:auto;font:700 25px/1 var(--f-disp);color:var(--red)}
+.shead .su{font:600 11px var(--f-mono);color:var(--mut)}
+.sdelta{font:500 10px var(--f-mono);color:var(--mut);margin-top:3px;letter-spacing:.02em}
+.sdelta b{color:var(--mut)}
+.sdelta b.up{color:var(--green)}
+.sform{display:flex;gap:7px;margin-top:9px}
+.sform input{flex:1;min-width:0;padding:9px 10px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;font:600 14px var(--f-body)}
+.sform button{padding:9px 14px;border:0;border-radius:7px;background:var(--red);color:#fff;font:600 12px var(--f-disp);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+
+.warn{margin-top:14px;padding:10px;border:1.5px solid var(--red);border-radius:8px;color:var(--red);font:500 11px var(--f-mono)}
+.goals{margin-top:32px;text-align:center;font:500 10px var(--f-mono);letter-spacing:.14em;color:var(--mut)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="ribbon"><i></i><i></i><i></i><i></i></div>
+<div id="app"><p class="hint">Загрузка…</p></div>
+</div>
+
+<script>
+/* ───────── конфиг ───────── */
+const KEY = 'bostik90'; /* тот же ключ — прежние отметки сохраняются */
+/* хранение: window.storage (внутри Claude) ИЛИ localStorage (на обычном сайте/Vercel) */
+const hasWS = typeof window.storage !== 'undefined';
+const hasLS = (() => { try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch(e){ return false; } })();
+const hasStore = hasWS || hasLS;
+let memFallback = null;
+let state = { startDate: null, days: {}, weights: [], records: { pull: [], bench: [], squat: [] }, v: 3 };
+let viewDate = new Date();
+
+/* type:'check' — галочка; type:'count' — счётчик усилий (больше сделал → больше XP) */
+const ITEMS = [
+  { id:'talk',  g:'АНГЛИЙСКИЙ', c:'c-en', e:'💬', type:'count', max:4,  norm:2, xp:12, name:'Разговор',  short:'РАЗГОВОР', normTxt:'норма 60 мин · +12 XP за 30 мин', fmt:v=>(v*30)+' мин' },
+  { id:'pron',  g:'АНГЛИЙСКИЙ', c:'c-en', e:'🗣️', type:'check', xp:12, name:'Произношение — 20 мин', short:'ПРОИЗН' },
+  { id:'anki',  g:'АНГЛИЙСКИЙ', c:'c-en', e:'🗂️', type:'check', xp:15, name:'Anki — 20 слов', short:'ANKI' },
+  { id:'read',  g:'АНГЛИЙСКИЙ', c:'c-en', e:'📖', type:'check', xp:12, name:'Чтение — 5 мин', short:'ЧТЕНИЕ' },
+  { id:'code',  g:'ФРОНТЕНД',   c:'c-fe', e:'💻', type:'count', max:6,  norm:2, xp:15, name:'Код', short:'КОД', normTxt:'норма 2 ч · +15 XP за час', fmt:v=>v+' ч' },
+  { id:'gym',   g:'ТЕЛО',       c:'c-bd', e:'🏋️', type:'check', xp:25, name:'Зал (3× в неделю)', short:'ЗАЛ' },
+  { id:'pull',  g:'ТЕЛО',       c:'c-bd', e:'🆙', type:'check', xp:10, name:'Подтягивания (дни без зала)', short:'ПОДТЯГ' },
+  { id:'steps', g:'ТЕЛО',       c:'c-bd', e:'👟', type:'count', max:20, norm:8, xp:2,  name:'Шаги', short:'ШАГИ', normTxt:'норма 8к · +2 XP за 1000', fmt:v=>v+'к' },
+  { id:'prot',  g:'ТЕЛО',       c:'c-bd', e:'🥩', type:'check', xp:15, name:'Белок', short:'БЕЛОК', dyn:ph=>ph===1?'Белок — 120 г':'Белок — 120 г' },
+  { id:'clean', g:'ТЕЛО',       c:'c-bd', e:'🍽️', type:'check', xp:15, name:'Калории', short:'ККАЛ', dyn:ph=>ph===1?'Калории ~2100, без срыва':'Калории ~2800, без срыва' },
+  { id:'sleep', g:'ПРИВЫЧКИ',   c:'c-hb', e:'😴', type:'check', xp:12, name:'Сон 7–8 ч', short:'СОН' }
+];
+const GROUPS = [
+  { name:'АНГЛИЙСКИЙ', c:'c-en' },
+  { name:'ФРОНТЕНД',   c:'c-fe' },
+  { name:'ТЕЛО',       c:'c-bd' },
+  { name:'ПРИВЫЧКИ',   c:'c-hb' }
+];
+const CLOSE_AT = 8;        /* день закрыт при 8/10 норм */
+const LVL_STEP = 1000;     /* XP на уровень */
+function rankOf(l){
+  if (l>=15) return 'ЛЕГЕНДА';
+  if (l>=12) return 'ТЕРМИНАТОР';
+  if (l>=9)  return 'МАШИНА';
+  if (l>=6)  return 'АТЛЕТ-КОДЕР';
+  if (l>=4)  return 'БОЕЦ';
+  if (l>=2)  return 'УЧЕНИК';
+  return 'НОВИЧОК';
+}
+
+/* ───────── утилиты ───────── */
+const pad = n => String(n).padStart(2,'0');
+const fmt = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+const parseK = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const addD = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const DOW = ['ВС','ПН','ВТ','СР','ЧТ','ПТ','СБ'];
+
+const dayNum  = k => Math.round((parseK(k) - parseK(state.startDate)) / 864e5) + 1;
+const phaseOf = n => n <= 35 ? 1 : 2;
+const day     = k => state.days[k] || {};
+const val     = (k,id) => day(k)[id] || 0;
+const itemBy  = id => ITEMS.find(i => i.id === id);
+const isGymDay = k => [2,4,6].includes(parseK(k).getDay());
+/* пункт активен сегодня: зал — только в дни зала, подтягивания — только в дни без зала */
+const activeOn = (k,it) => it.id === 'gym' ? isGymDay(k) : it.id === 'pull' ? !isGymDay(k) : true;
+const itemsOn  = k => ITEMS.filter(it => activeOn(k,it));
+const met     = (k,it) => it.type === 'count' ? val(k,it.id) >= it.norm : !!val(k,it.id);
+const doneCnt = k => itemsOn(k).filter(it => met(k,it)).length;
+const closeNeed = k => Math.max(1, itemsOn(k).length - 2); /* можно пропустить 2 пункта */
+const isClosed = k => dayNum(k) >= 1 && doneCnt(k) >= closeNeed(k);
+function dayXP(k){
+  let x = 0;
+  for (const it of itemsOn(k)) x += it.type === 'count' ? (val(k,it.id) * it.xp) : (val(k,it.id) ? it.xp : 0);
+  return x;
+}
+function totalXP(){
+  let t = 0;
+  for (const k in state.days) if (dayNum(k) >= 1) t += dayXP(k);
+  return t;
+}
+function streak(){
+  let d = new Date();
+  if (!isClosed(fmt(d))) d = addD(d,-1);
+  let s = 0;
+  while (dayNum(fmt(d)) >= 1 && isClosed(fmt(d))) { s++; d = addD(d,-1); }
+  return s;
+}
+function itemStreak(id){
+  const it = itemBy(id);
+  let d = new Date();
+  if (!met(fmt(d),it)) d = addD(d,-1);
+  let s = 0;
+  while (dayNum(fmt(d)) >= 1 && met(fmt(d),it)) { s++; d = addD(d,-1); }
+  return s;
+}
+function weekOf(ref){
+  const mon = addD(ref, -((ref.getDay()+6)%7));
+  const ks = [];
+  for (let i=0;i<7;i++) ks.push(fmt(addD(mon,i)));
+  return ks;
+}
+function totals(){
+  let gym=0, talkU=0, codeH=0, readD=0;
+  for (const k in state.days) {
+    if (dayNum(k) < 1) continue;
+    const d = state.days[k];
+    if (d.gym) gym++;
+    talkU += d.talk||0; codeH += d.code||0;
+    if (d.read) readD++;
+  }
+  return { gym, talkH: talkU*0.5, codeH, readD };
+}
+
+/* ───────── хранилище + миграция ───────── */
+function migrate(){
+  if (state.v === 3) return false;
+  for (const k in state.days) {
+    const d = state.days[k];
+    d.talk  = typeof d.talk  === 'number' ? d.talk  : (d.talk  ? 2 : 0);
+    d.code  = typeof d.code  === 'number' ? d.code  : (d.code  ? 2 : 0);
+    d.steps = typeof d.steps === 'number' ? d.steps : (d.steps ? 8 : 0);
+  }
+  state.v = 3;
+  return true;
+}
+async function loadState(){
+  if (hasWS) {
+    try {
+      const r = await window.storage.get(KEY);
+      if (r && r.value) state = JSON.parse(r.value);
+    } catch(e) { /* первый запуск */ }
+  } else if (hasLS) {
+    try {
+      const v = localStorage.getItem(KEY);
+      if (v) state = JSON.parse(v);
+    } catch(e) { /* первый запуск или повреждённые данные */ }
+  } else if (memFallback) { state = memFallback; }
+  if (!state.startDate) { state.startDate = fmt(new Date()); }
+  if (!state.records) state.records = { pull: [], bench: [], squat: [] };
+  if (migrate() || !state.v) {}
+  await saveState();
+}
+async function saveState(){
+  if (hasWS) {
+    try { await window.storage.set(KEY, JSON.stringify(state)); }
+    catch(e) { console.error('storage:', e); }
+  } else if (hasLS) {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch(e) { console.error('localStorage:', e); }
+  } else { memFallback = state; }
+}
+
+/* ───────── действия ───────── */
+window.toggle = id => {
+  const k = fmt(viewDate);
+  if (dayNum(k) < 1) return;
+  const d = state.days[k] || (state.days[k] = {});
+  d[id] = !d[id];
+  saveState(); render();
+};
+window.inc = (id, delta) => {
+  const k = fmt(viewDate);
+  if (dayNum(k) < 1) return;
+  const it = itemBy(id);
+  const d = state.days[k] || (state.days[k] = {});
+  d[id] = Math.min(it.max, Math.max(0, (d[id]||0) + delta));
+  saveState(); render();
+};
+window.nav = n => {
+  const nd = addD(viewDate, n);
+  if (fmt(nd) > fmt(new Date()) || dayNum(fmt(nd)) < 1) return;
+  viewDate = nd; render();
+};
+window.goToday = () => { viewDate = new Date(); render(); };
+window.goDay = n => { viewDate = addD(parseK(state.startDate), n-1); render(); };
+window.saveWeight = () => {
+  const el = document.getElementById('wIn');
+  const v = parseFloat((el.value || '').replace(',','.'));
+  if (!v || v < 40 || v > 200) { el.focus(); return; }
+  const k = fmt(new Date());
+  state.weights = state.weights.filter(w => w.d !== k);
+  state.weights.push({ d:k, w: Math.round(v*10)/10 });
+  state.weights.sort((a,b) => a.d < b.d ? -1 : 1);
+  saveState(); render();
+};
+window.saveRec = (metric, inputId, max) => {
+  const el = document.getElementById(inputId);
+  const v = parseFloat((el.value || '').replace(',','.'));
+  if (!v || v < 0 || v > max) { el.focus(); return; }
+  const k = fmt(new Date());
+  if (!state.records[metric]) state.records[metric] = [];
+  state.records[metric] = state.records[metric].filter(r => r.d !== k);
+  state.records[metric].push({ d:k, v: Math.round(v*10)/10 });
+  state.records[metric].sort((a,b) => a.d < b.d ? -1 : 1);
+  saveState(); render();
+};
+
+/* ───────── графики ───────── */
+function recChart(arr, color){
+  if (arr.length < 2) return '';
+  const W=300, H=44, P=6;
+  const vals = arr.map(x => x.v);
+  let mn = Math.min(...vals), mx = Math.max(...vals);
+  if (mx - mn < 1) { const c=(mx+mn)/2; mn=c-.5; mx=c+.5; }
+  const X = i => P + i*(W-2*P)/(arr.length-1);
+  const Y = v => P + (mx-v)*(H-2*P)/(mx-mn);
+  const pts = arr.map((x,i) => X(i).toFixed(1)+','+Y(x.v).toFixed(1)).join(' ');
+  const dots = arr.map((x,i) => '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(x.v).toFixed(1)+'" r="2.6" fill="'+color+'"/>').join('');
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="display:block;width:100%;height:auto;margin-top:8px"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2"/>'+dots+'</svg>';
+}
+function chartSVG(){
+  const ws = state.weights;
+  if (ws.length === 0) return '<p class="hint">⚖️ Запиши первый вес — от него пойдёт график к цели 80 кг. Утром натощак, 3 раза в неделю.</p>';
+  if (ws.length === 1) return '<p class="hint">Первая точка есть. Со второй записи появится график.</p>';
+  const W=320, H=110, P=16;
+  const vals = ws.map(x => x.w);
+  let mn = Math.min(...vals, 80), mx = Math.max(...vals);
+  if (mx - mn < 1.5) { const c=(mx+mn)/2; mn=c-1; mx=c+1; }
+  mn -= .3; mx += .3;
+  const X = i => P + i*(W-2*P)/(ws.length-1);
+  const Y = v => P + (mx-v)*(H-2*P)/(mx-mn);
+  const pts  = ws.map((x,i) => X(i).toFixed(1)+','+Y(x.w).toFixed(1)).join(' ');
+  const dots = ws.map((x,i) => '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(x.w).toFixed(1)+'" r="3.2" fill="var(--red)"/>').join('');
+  const last = ws[ws.length-1];
+  const ty = Y(80).toFixed(1);
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="chart" role="img" aria-label="График веса">'
+    + '<line x1="'+P+'" y1="'+ty+'" x2="'+(W-P)+'" y2="'+ty+'" stroke="var(--green)" stroke-dasharray="4 4" stroke-width="1.2"/>'
+    + '<text x="'+(W-P)+'" y="'+(ty-4)+'" text-anchor="end" class="tlab glab">цель 80</text>'
+    + '<polyline points="'+pts+'" fill="none" stroke="var(--red)" stroke-width="2.2"/>'
+    + dots
+    + '<text x="'+X(ws.length-1).toFixed(1)+'" y="'+(Y(last.w)-7).toFixed(1)+'" text-anchor="end" class="tlab">'+last.w+'</text>'
+    + '</svg>';
+}
+function xpChart(){
+  const W=320, H=96, P=12, N=14;
+  const days = [];
+  for (let i=N-1;i>=0;i--) days.push(fmt(addD(new Date(),-i)));
+  const xs = days.map(k => dayNum(k) >= 1 ? dayXP(k) : 0);
+  const ymax = Math.max(180, ...xs);
+  const bw = (W-2*P)/N;
+  let bars = '';
+  days.forEach((k,i) => {
+    const h = Math.max(2, xs[i]/ymax*(H-2*P-12));
+    const x = P + i*bw + bw*0.15;
+    const y = H - P - h;
+    const col = dayNum(k) < 1 ? 'var(--line)' : (isClosed(k) ? 'var(--green)' : (xs[i] > 0 ? 'var(--amber)' : 'var(--misspink)'));
+    bars += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+(bw*0.7).toFixed(1)+'" height="'+h.toFixed(1)+'" rx="2" fill="'+col+'"/>';
+  });
+  const todayXp = xs[N-1];
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="xchart" role="img" aria-label="XP за 14 дней">'
+    + bars
+    + '<line x1="'+P+'" y1="'+(H-P)+'" x2="'+(W-P)+'" y2="'+(H-P)+'" stroke="var(--line)" stroke-width="1.5"/>'
+    + '<text x="'+P+'" y="'+(P-2)+'" class="xlab">XP ПО ДНЯМ · 14 ДНЕЙ</text>'
+    + '<text x="'+(W-P)+'" y="'+(P-2)+'" text-anchor="end" class="xlab">сегодня: '+todayXp+'</text>'
+    + '</svg>';
+}
+
+/* ───────── ачивки ───────── */
+function badges(){
+  const t = totals();
+  const s = streak();
+  const pullS = itemStreak('pull');
+  const ws = state.weights;
+  const lvl = Math.floor(totalXP()/LVL_STEP) + 1;
+  return [
+    { e:'🟩', t:'ПЕРВЫЙ ДЕНЬ',  cur:s>0?1:0,                 goal:1,  sub:v=>v+'/1'   },
+    { e:'🔥', t:'СЕРИЯ 7',      cur:Math.min(s,7),            goal:7,  sub:v=>v+'/7'   },
+    { e:'🔥', t:'СЕРИЯ 21',     cur:Math.min(s,21),           goal:21, sub:v=>v+'/21'  },
+    { e:'🏋️', t:'12 ТРЕНИРОВОК',cur:Math.min(t.gym,12),       goal:12, sub:v=>v+'/12'  },
+    { e:'💬', t:'10 Ч РЕЧИ',    cur:Math.min(t.talkH,10),     goal:10, sub:v=>v.toFixed(1)+'/10ч' },
+    { e:'💻', t:'50 Ч КОДА',    cur:Math.min(t.codeH,50),     goal:50, sub:v=>v+'/50ч' },
+    { e:'📖', t:'21 ДЕНЬ ЧТЕНИЯ',cur:Math.min(t.readD,21),    goal:21, sub:v=>v+'/21'  },
+    { e:'🆙', t:'ПОДТЯГ. 7 ДНЕЙ',cur:Math.min(pullS,7),       goal:7,  sub:v=>v+'/7'   },
+    { e:'🤖', t:'РУМ SOLVER',   cur:Math.min(t.codeH,1)?1:0,  goal:1,  sub:()=>'старт' },
+    { e:'🏆', t:'УРОВЕНЬ 5',    cur:Math.min(lvl,5),          goal:5,  sub:v=>v+'/5'   },
+    { e:'🏆', t:'УРОВЕНЬ 10',   cur:Math.min(lvl,10),         goal:10, sub:v=>v+'/10'  },
+    { e:'👑', t:'90/90',        cur:0,                        goal:1,  sub:()=>'финал' }
+  ];
+}
+
+/* ───────── рендер ───────── */
+function render(){
+  const tk = fmt(new Date());
+  const vk = fmt(viewDate);
+  const tn = Math.min(dayNum(tk), 90);
+  const vn = dayNum(vk);
+  const ph = phaseOf(vn);
+  const dn = doneCnt(vk);
+  const endD = addD(parseK(state.startDate), 89);
+  const tXP = totalXP();
+  const lvl = Math.floor(tXP/LVL_STEP) + 1;
+  const inLvl = tXP % LVL_STEP;
+
+  let h = '';
+
+  /* шапка */
+  h += '<p class="eyebrow">ТРАНСФОРМАЦИЯ · ' + pad(parseK(state.startDate).getDate()) + '.' + pad(parseK(state.startDate).getMonth()+1)
+     + ' — ' + pad(endD.getDate()) + '.' + pad(endD.getMonth()+1) + '</p>';
+  h += '<div class="dayrow"><span class="daynum">ДЕНЬ ' + pad(Math.min(vn,90)) + '</span><span class="of">/ 90</span></div>';
+  h += ph === 1
+     ? '<span class="phase p1">ФАЗА 1 · СУШКА · 2100 ККАЛ · БЕЛОК 180</span>'
+     : '<span class="phase p2">ФАЗА 2 · МАССА · 2800 ККАЛ · БЕЛОК 170</span>';
+
+  /* уровень */
+  h += '<div class="lvl"><div class="lvlrow">'
+     + '<span class="lvlnum">LVL ' + lvl + '</span>'
+     + '<span class="lvlrank">' + rankOf(lvl) + '</span>'
+     + '<span class="lvlxp">+' + dayXP(vk) + ' XP ' + (vk === tk ? 'сегодня' : 'за этот день') + '</span></div>'
+     + '<div class="xpbar"><i style="width:' + (inLvl/LVL_STEP*100).toFixed(1) + '%"></i></div>'
+     + '<div class="xpsub">' + tXP + ' XP всего · до LVL ' + (lvl+1) + ' осталось ' + (LVL_STEP-inLvl) + ' XP</div></div>';
+
+  /* путь 90 */
+  h += '<div class="bar"><i style="width:' + (tn/90*100).toFixed(1) + '%"></i><span class="tick"></span></div>';
+  h += '<div class="barlbl"><span>СТАРТ</span><span>ДЕНЬ 35 → МАССА</span><span>ФИНИШ</span></div>';
+  if (!hasStore) h += '<div class="warn">Файл открыт вне Claude — отметки не сохранятся между сессиями.</div>';
+
+  /* статистика */
+  h += '<div class="stats">'
+     + '<div class="stat"><b class="' + (isClosed(vk) ? 'ok' : '') + '">' + dn + '/' + itemsOn(vk).length + '</b><span>НОРМ ВЫПОЛНЕНО</span></div>'
+     + '<div class="stat"><b>🔥 ' + streak() + '</b><span>СЕРИЯ ДНЕЙ</span></div>'
+     + '<div class="stat"><b>' + weekOf(viewDate).filter(k=>day(k).gym && [2,4,6].includes(parseK(k).getDay())).length + '/3</b><span>ЗАЛ / НЕД</span></div>'
+     + '</div>';
+
+  /* подписанные чипы дня */
+  h += '<div class="chips">' + itemsOn(vk).map(it => {
+    const on = met(vk,it);
+    return '<div class="chip ' + it.c + (on ? ' on' : '') + '" title="' + it.name + '"><em>' + it.e + '</em><b>' + it.short + '</b></div>';
+  }).join('') + '</div>';
+
+  /* навигация по датам */
+  h += '<div class="nav">'
+     + '<button class="arr" onclick="nav(-1)" ' + (vn <= 1 ? 'disabled' : '') + ' aria-label="Предыдущий день">‹</button>'
+     + '<div class="dmid"><div class="dlab">' + DOW[viewDate.getDay()] + ', ' + viewDate.getDate() + ' ' + MONTHS[viewDate.getMonth()] + '</div>'
+     + (vk !== tk ? '<button class="tlink" onclick="goToday()">→ к сегодня</button>' : '')
+     + '</div>'
+     + '<button class="arr" onclick="nav(1)" ' + (vk === tk ? 'disabled' : '') + ' aria-label="Следующий день">›</button>'
+     + '</div>';
+
+  /* чек-лист */
+  for (const g of GROUPS) {
+    const items = ITEMS.filter(i => i.g === g.name && activeOn(vk, i));
+    if (!items.length) continue;
+    h += '<div class="ghead ' + g.c + '">' + g.name + '</div><div class="group">';
+    for (const it of items) {
+      const on = met(vk,it);
+      let label = it.dyn ? it.dyn(ph) : it.name;
+      if (it.id === 'gym') { label = [2,4,6].includes(viewDate.getDay()) ? 'Зал (Вт/Чт/Сб)' : 'Зарядка / турник (минимум)'; }
+      if (it.type === 'check') {
+        h += '<button class="item ' + it.c + (on ? ' on' : '') + '" onclick="toggle(\'' + it.id + '\')" aria-pressed="' + on + '">'
+           + '<span class="box" aria-hidden="true">' + (on ? '✓' : '') + '</span>'
+           + '<span class="lbl">' + it.e + ' ' + label + '</span>'
+           + '<span class="xptag">+' + it.xp + ' XP</span></button>';
+      } else {
+        const v = val(vk,it.id);
+        h += '<div class="item ' + it.c + (on ? ' on' : '') + '">'
+           + '<span class="lbl">' + it.e + ' ' + label
+           + '<span class="norm">' + it.normTxt + '</span></span>'
+           + '<span class="cnt">'
+           + '<button class="stp" onclick="inc(\'' + it.id + '\',-1)" aria-label="Меньше">−</button>'
+           + '<span class="cval">' + it.fmt(v) + '</span>'
+           + '<button class="stp" onclick="inc(\'' + it.id + '\',1)" aria-label="Больше">+</button>'
+           + '</span></div>';
+      }
+    }
+    h += '</div>';
+  }
+
+  h += isClosed(vk)
+     ? '<div class="closed yes">✓ ДЕНЬ ЗАКРЫТ · +' + dayXP(vk) + ' XP</div>'
+     : '<div class="closed no">ДО ЗАКРЫТИЯ ДНЯ: ЕЩЁ ' + Math.max(0, closeNeed(vk) - dn) + ' НОРМ(Ы)</div>';
+
+  /* неделя — насколько идёт прогресс */
+  const wk = weekOf(viewDate);
+  const wTalk = wk.reduce((a,k)=>a+(day(k).talk||0),0)*0.5;
+  const wCode = wk.reduce((a,k)=>a+(day(k).code||0),0);
+  const wGym  = wk.filter(k=>day(k).gym && [2,4,6].includes(parseK(k).getDay())).length;
+  const wPull = wk.filter(k=>day(k).pull && ![2,4,6].includes(parseK(k).getDay())).length;
+  const wStep = wk.filter(k=>(day(k).steps||0)>=8).length;
+  const wrow = (cls,lbl,cur,goal,txt) => {
+    const pct = cur/goal*100;
+    const over = cur > goal;
+    return '<div class="wrow ' + cls + (over ? ' over' : '') + '"><span class="wlbl">' + lbl + '</span>'
+      + '<div class="wbar"><i style="width:' + Math.min(100,pct).toFixed(0) + '%"></i></div>'
+      + '<span class="wval">' + txt + (over ? ' <b class="overbadge">🔥 красавчик, перевыполнил!</b>' : '') + '</span></div>';
+  };
+  h += '<div class="wkcard"><div class="ghead" style="margin-top:0">НЕДЕЛЯ · ПН–ВС</div>'
+     + wrow('c-en','💬 Разговор', wTalk, 7,  wTalk.toFixed(1)+'/7ч')
+     + wrow('c-fe','💻 Код',      wCode, 14, wCode+'/14ч')
+     + wrow('c-bd','🏋️ Зал',      wGym,  3,  wGym+'/3')
+     + wrow('c-bd','🆙 Подтягив.', wPull, 4,  wPull+'/4')
+     + wrow('c-hb','👟 Дни 8к+',  wStep, 7,  wStep+'/7')
+     + xpChart()
+     + '</div>';
+
+  /* поле 90 */
+  h += '<div class="gridwrap"><div class="ghead c-hb">ПОЛЕ 90 ДНЕЙ</div><div class="g90">';
+  for (let n=1; n<=90; n++) {
+    const k = fmt(addD(parseK(state.startDate), n-1));
+    let cls = 'cell';
+    if (k > tk) cls += ' future';
+    else if (isClosed(k)) cls += ' full';
+    else if (doneCnt(k) > 0 || dayXP(k) > 0) cls += ' part';
+    else cls += ' miss';
+    if (n === vn) cls += ' cur';
+    const clk = k <= tk ? ' clk" onclick="goDay(' + n + ')' : '';
+    h += '<button class="' + cls + clk + '" aria-label="День ' + n + '"></button>';
+  }
+  h += '</div><p class="legend">'
+     + '<span class="lg" style="background:var(--green)"></span>день закрыт'
+     + '<span class="lg" style="background:var(--amber)"></span>частично'
+     + '<span class="lg" style="background:var(--misspink)"></span>пропуск'
+     + '<span class="lg" style="background:var(--card);border:1.5px solid var(--line)"></span>впереди'
+     + '<br>1–35 сушка · 36–90 масса · тап по клетке — открыть день</p></div>';
+
+  /* ачивки */
+  h += '<div class="gridwrap"><div class="ghead c-fe">АЧИВКИ</div><div class="bdgs">'
+     + badges().map(b => {
+        const ok = b.cur >= b.goal;
+        return '<div class="bdg' + (ok ? ' ok' : '') + '"><em>' + b.e + '</em><b>' + b.t + '</b><i>' + (ok ? 'ПОЛУЧЕНО' : b.sub(b.cur)) + '</i></div>';
+       }).join('')
+     + '</div></div>';
+
+  /* сила · подтягивания */
+  const RECS = [
+    { m:'pull', n:'Подтягивания', u:'повт.', max:100 }
+  ];
+  const fmtN = x => Number.isInteger(x) ? x : x.toFixed(1);
+  let sh = '<div class="wcard"><div class="ghead c-bd" style="margin-top:0">ПОДТЯГИВАНИЯ</div>'
+    + '<p class="hint" style="margin:0 0 10px">Рост силы — твоё честное «до и после». Записывай раз в неделю.</p>';
+  for (const r of RECS) {
+    const arr = state.records[r.m] || [];
+    const cur = arr.length ? arr[arr.length-1].v : null;
+    const first = arr.length ? arr[0].v : null;
+    const d = arr.length > 1 ? (cur - first) : 0;
+    sh += '<div class="scard"><div class="shead"><span class="sn">' + r.n + '</span>'
+        + '<span class="sv">' + (cur !== null ? fmtN(cur) : '—') + '</span><span class="su">' + r.u + '</span></div>';
+    if (arr.length > 1) sh += '<div class="sdelta">старт ' + fmtN(first) + ' · <b class="' + (d > 0 ? 'up' : '') + '">' + (d > 0 ? '+' : '') + fmtN(d) + '</b> · ' + arr.length + ' зам.</div>';
+    else if (arr.length === 1) sh += '<div class="sdelta">первая запись есть — со второй пойдёт рост</div>';
+    else sh += '<div class="sdelta">запиши первое значение</div>';
+    sh += recChart(arr, 'var(--red)');
+    sh += '<div class="sform"><input id="rec_' + r.m + '" type="text" inputmode="decimal" placeholder="' + r.u + '" aria-label="' + r.n + '"><button onclick="saveRec(\'' + r.m + '\',\'rec_' + r.m + '\',' + r.max + ')">Записать</button></div>';
+    sh += '</div>';
+  }
+  sh += '</div>';
+  h += sh;
+
+  /* вес */
+  const ws = state.weights;
+  const lastW = ws.length ? ws[ws.length-1].w : null;
+  const firstW = ws.length ? ws[0].w : null;
+  const delta = ws.length > 1 ? (lastW - firstW) : 0;
+  h += '<div class="wcard"><div class="ghead c-bd" style="margin-top:0">ВЕС · РАЗ В НЕДЕЛЮ</div>'
+     + '<div class="wnow"><b>' + (lastW !== null ? lastW.toFixed(1) + ' кг' : '— кг') + '</b>'
+     + '<span class="wmeta">' + (ws.length ? 'старт ' + firstW.toFixed(1) + ' · Δ ' + (delta > 0 ? '+' : '') + delta.toFixed(1) + ' · цель 80.0' : 'цель 80.0 кг') + '</span></div>'
+     + chartSVG()
+     + '<p class="hint" style="margin:8px 0 0">Раз в неделю, утром натощак. Смотри тренд за пару недель, а не одну цифру.</p>'
+     + '<div class="wform"><input id="wIn" type="text" inputmode="decimal" placeholder="напр. 83.0" aria-label="Вес в кг">'
+     + '<button onclick="saveWeight()">Записать</button></div></div>';
+
+  h += '<p class="goals">−3 КГ ЖИРА · +2 КГ МЫШЦ · ENGLISH C1 · ФРОНТЕНД · НОГТИ ЦЕЛЫ</p>';
+
+  document.getElementById('app').innerHTML = h;
+}
+
+function boot(){
+  loadState()
+    .then(render)
+    .catch(err => {
+      console.error('init error:', err);
+      try { render(); }
+      catch(e2){
+        document.getElementById('app').innerHTML =
+          '<p class="hint">Не удалось загрузить сохранённые данные, но трекер работает. Обнови страницу. (' + (err && err.message ? err.message : 'ошибка') + ')</p>';
+      }
+    });
+}
+boot();
+</script>
+</body>
+</html>
